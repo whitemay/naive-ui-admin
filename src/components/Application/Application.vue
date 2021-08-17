@@ -16,7 +16,6 @@
 
       bus.on('loading', (status) => {
         if (status == 'start') {
-          console.log('start');
           loadingBar.start();
         } else if (status == 'error') {
           loadingBar.error();
@@ -40,6 +39,7 @@
       bus.on('modal.warning', (params) => {
         dialog.warning(params);
       });
+      // 重新发送一遍，只是为了避免if-else写法。
       bus.emit('loading', currentLoading());
 
       return {};
