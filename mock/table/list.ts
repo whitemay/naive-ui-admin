@@ -1,5 +1,5 @@
 import { Random } from 'mockjs';
-import { resultSuccess, doCustomTimes } from '../_util';
+import { resultSuccess, doCustomTimes, resultError } from '../_util';
 
 const tableList = (pageSize) => {
   const result: any[] = [];

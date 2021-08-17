@@ -6,10 +6,10 @@ import { setupStore } from '@/store';
 import MakeitCaptcha from 'makeit-captcha';
 import 'makeit-captcha/dist/captcha.min.css';
 import { setupNaive, setupDirectives } from '@/plugins';
-import { AppProvider } from '@/components/Application';
+//import { AppProvider } from '@/components/Application';
 
 async function bootstrap() {
-  const appProvider = createApp(AppProvider);
+  //const appProvider = createApp(AppProvider);
 
   const app = createApp(App);
 
@@ -31,7 +31,7 @@ async function bootstrap() {
   setupStore(app);
 
   //优先挂载一下 Provider 解决路由守卫，Axios中可使用，Dialog，Message 等之类组件
-  appProvider.mount('#appProvider', true);
+  //appProvider.mount('#appProvider', true);
 
   // 挂载路由
   await setupRouter(app);

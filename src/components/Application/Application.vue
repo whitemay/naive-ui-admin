@@ -1,39 +1,45 @@
 <template>
-  <n-loading-bar-provider>
-    <n-dialog-provider>
-      <DialogContent />
-      <n-notification-provider>
-        <n-message-provider>
-          <MessageContent />
-          <slot slot="default"></slot>
-        </n-message-provider>
-      </n-notification-provider>
-    </n-dialog-provider>
-  </n-loading-bar-provider>
+  <slot></slot>
 </template>
 
 <script lang="ts">
   import { defineComponent } from 'vue';
-  import {
-    NDialogProvider,
-    NNotificationProvider,
-    NMessageProvider,
-    NLoadingBarProvider,
-  } from 'naive-ui';
-  import { MessageContent } from '@/components/MessageContent';
-  import { DialogContent } from '@/components/DialogContent';
+  import { useMessage, useDialog, useLoadingBar } from 'naive-ui';
+  import { bus } from '@/utils/eventbus';
 
   export default defineComponent({
     name: 'Application',
-    components: {
-      NDialogProvider,
-      NNotificationProvider,
-      NMessageProvider,
-      NLoadingBarProvider,
-      MessageContent,
-      DialogContent,
-    },
     setup() {
+      const loadingBar = useLoadingBar();
+      const message = useMessage();
+      const dialog = useDialog();
+
+      bus.on('loading', (status) => {
+        if (status == 'start') {
+          loadingBar.start();
+        } else if (status == 'error') {
+          loadingBar.error();
+        } else {
+          loadingBar.finish();
+        }
+      });
+
+      bus.on('message.success', (msg) => {
+        message.success(msg);
+      });
+
+      bus.on('message.error', (msg) => {
+        message.error(msg);
+      });
+
+      bus.on('modal.info', (params) => {
+        dialog.info(params);
+      });
+
+      bus.on('model.warning', (params) => {
+        dialog.warning(params);
+      });
+
       return {};
     },
   });

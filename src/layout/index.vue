@@ -148,8 +148,8 @@
   onMounted(() => {
     window.addEventListener('resize', watchWidth);
     //挂载在 window 方便与在js中使用
-    window['$loading'] = useLoadingBar();
-    window['$loading'].finish();
+    //window['$loading'] = useLoadingBar();
+    //window['$loading'].finish();
   });
 
 </script>

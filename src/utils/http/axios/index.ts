@@ -20,6 +20,7 @@ const urlPrefix = globSetting.urlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
+import { bus } from '@/utils/eventbus';
 
 /**
  * @description: 数据处理，方便区分多种处理方式
@@ -30,7 +31,6 @@ const transform: AxiosTransform = {
    */
   transformRequestData: (res: AxiosResponse<Result>, options: RequestOptions) => {
     // @ts-ignore
-    const { $message: Message, $dialog: Modal } = window;
     const {
       isShowMessage = true,
       isShowErrorMessage,
@@ -57,7 +57,7 @@ const transform: AxiosTransform = {
 
     if (!data) {
       // return '[HTTP] Request has no return value';
-      return reject(data);
+      return reject(new Error('no data'));
     }
     //  这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
     const { code, result, message } = data;
@@ -67,13 +67,13 @@ const transform: AxiosTransform = {
     if (isShowMessage) {
       if (hasSuccess && (successMessageText || isShowSuccessMessage)) {
         // 是否显示自定义信息提示
-        Message.success(successMessageText || message || '操作成功！');
+        bus.emit('message.success', successMessageText || message || '操作成功！');
       } else if (!hasSuccess && (errorMessageText || isShowErrorMessage)) {
         // 是否显示自定义信息提示
-        Message.error(message || errorMessageText || '操作失败！');
+        bus.emit('message.error', message || errorMessageText || '操作失败！');
       } else if (!hasSuccess && options.errorMessageMode === 'modal') {
         // errorMessageMode=‘custom-modal’的时候会显示modal错误弹窗，而不是消息提示，用于一些比较重要的错误
-        Modal.info({
+        bus.emit('modal.info', {
           title: '提示',
           content: message,
           positiveText: '确定',
@@ -89,11 +89,11 @@ const transform: AxiosTransform = {
     // 接口请求错误，统一提示错误信息
     if (code === ResultEnum.ERROR) {
       if (message) {
-        Message.error(data.message);
+        bus.emit('message.error', data.message);
         Promise.reject(new Error(message));
       } else {
         const msg = '操作失败,系统异常!';
-        Message.error(msg);
+        bus.emit('message.error', msg);
         Promise.reject(new Error(msg));
       }
       return reject();
@@ -104,7 +104,7 @@ const transform: AxiosTransform = {
       if (router.currentRoute.value.name == 'login') return;
       // 到登录页
       const timeoutMsg = '登录超时,请重新登录!';
-      Modal.warning({
+      bus.emit('modal.warning', {
         title: '提示',
         content: '登录身份已失效，请重新登录!',
         positiveText: '确定',
@@ -188,7 +188,6 @@ const transform: AxiosTransform = {
    */
   responseInterceptorsCatch: (error: any) => {
     // @ts-ignore
-    const { $message: Message, $dialog: Modal } = window;
     const { response, code, message } = error || {};
     // TODO 此处要根据后端接口返回格式修改
     const msg: string =
@@ -196,11 +195,11 @@ const transform: AxiosTransform = {
     const err: string = error.toString();
     try {
       if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
-        Message.error('接口请求超时,请刷新页面重试!');
+        bus.emit('message.error', '接口请求超时,请刷新页面重试!');
         return;
       }
       if (err && err.includes('Network Error')) {
-        Modal.info({
+        bus.emit('modal.info', {
           title: '网络异常',
           content: '请检查您的网络连接是否正常!',
           positiveText: '确定',
@@ -214,7 +213,7 @@ const transform: AxiosTransform = {
     // 请求是否被取消
     const isCancel = axios.isCancel(error);
     if (!isCancel) {
-      checkStatus(error.response && error.response.status, msg, Message);
+      checkStatus(error.response && error.response.status, msg);
     } else {
       console.warn(error, '请求被取消！');
     }
