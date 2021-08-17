@@ -6,6 +6,7 @@ import { setupStore } from '@/store';
 import MakeitCaptcha from 'makeit-captcha';
 import 'makeit-captcha/dist/captcha.min.css';
 import { setupNaive, setupDirectives } from '@/plugins';
+// eslint-disable-next-line no-unused-vars
 import { bus } from '@/utils/eventbus'; // 只是为了确保eventbus模块提前被加载
 //import { AppProvider } from '@/components/Application';
 
