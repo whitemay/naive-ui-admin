@@ -1,17 +1,18 @@
 import mitt from 'mitt';
+import { ref } from 'vue';
 
 export const bus = mitt();
 
-let loading = 'start';
+const loading = ref('start');
 
 // listen to all events
 bus.on('*', (type, e) => {
-  console.log(type, e);
+  // console.log(type, e);
   if (type == 'loading') {
-    loading = e;
+    loading.value = e;
   }
 });
 
-export function getLoading() {
-  return loading;
+export function currentLoading() {
+  return loading.value;
 }
