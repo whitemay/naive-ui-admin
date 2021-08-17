@@ -37,7 +37,7 @@
         dialog.info(params);
       });
 
-      bus.on('model.warning', (params) => {
+      bus.on('modal.warning', (params) => {
         dialog.warning(params);
       });
       bus.emit('loading', getLoading());

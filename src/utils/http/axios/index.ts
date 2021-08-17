@@ -112,7 +112,7 @@ const transform: AxiosTransform = {
         onPositiveClick: () => {
           storage.clear();
           router.replace({
-            name: 'login',
+            name: 'Login',
             query: {
               redirect: router.currentRoute.value.fullPath,
             },
