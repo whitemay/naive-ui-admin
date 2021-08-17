@@ -6,6 +6,7 @@ import { setupStore } from '@/store';
 import MakeitCaptcha from 'makeit-captcha';
 import 'makeit-captcha/dist/captcha.min.css';
 import { setupNaive, setupDirectives } from '@/plugins';
+import { bus } from '@/utils/eventbus';
 //import { AppProvider } from '@/components/Application';
 
 async function bootstrap() {

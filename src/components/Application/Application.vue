@@ -5,7 +5,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { useMessage, useDialog, useLoadingBar } from 'naive-ui';
-  import { bus } from '@/utils/eventbus';
+  import { bus, getLoading } from '@/utils/eventbus';
 
   export default defineComponent({
     name: 'Application',
@@ -16,6 +16,7 @@
 
       bus.on('loading', (status) => {
         if (status == 'start') {
+          console.log('start');
           loadingBar.start();
         } else if (status == 'error') {
           loadingBar.error();
@@ -39,6 +40,7 @@
       bus.on('model.warning', (params) => {
         dialog.warning(params);
       });
+      bus.emit('loading', getLoading());
 
       return {};
     },
