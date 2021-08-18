@@ -16,7 +16,6 @@
 
       loadingSubject.subscribe({
         next: (status) => {
-          console.log(status);
           if (status == 'start') {
             loadingBar.start();
           } else if (status == 'error') {
