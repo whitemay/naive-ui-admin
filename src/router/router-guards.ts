@@ -6,7 +6,7 @@ import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/utils/Storage';
 import { PageEnum } from '@/enums/pageEnum';
 import { ErrorPageRoute } from '@/router/base';
-import { bus } from '@/utils/eventbus';
+import { loadingSubject } from '@/utils/subjects';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
@@ -17,7 +17,7 @@ export function createRouterGuards(router: Router) {
   const asyncRouteStore = useAsyncRouteStoreWidthOut();
   router.beforeEach(async (to, from, next) => {
     //const Loading = window['$loading'] || null;
-    bus.emit('loading', 'start');
+    loadingSubject.next('start');
     if (from.path === LOGIN_PATH && to.name === 'errorPage') {
       next(PageEnum.BASE_HOME);
       return;
@@ -77,7 +77,7 @@ export function createRouterGuards(router: Router) {
     const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect };
     asyncRouteStore.setDynamicAddedRoute(true);
     next(nextData);
-    bus.emit('loading', 'finish');
+    loadingSubject.next('finish');
   });
 
   router.afterEach((to, _, failure) => {
@@ -101,7 +101,7 @@ export function createRouterGuards(router: Router) {
     }
     asyncRouteStore.setKeepAliveComponents(keepAliveComponents);
     //const Loading = window['$loading'] || null;
-    bus.emit('loading', 'finish');
+    loadingSubject.next('finish');
   });
 
   router.onError((error) => {

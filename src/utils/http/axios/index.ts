@@ -20,7 +20,7 @@ const urlPrefix = globSetting.urlPrefix || '';
 
 import router from '@/router';
 import { storage } from '@/utils/Storage';
-import { bus } from '@/utils/eventbus';
+import { messageSubject, modalSubject } from '@/utils/subjects';
 
 /**
  * @description: 数据处理，方便区分多种处理方式
@@ -67,17 +67,23 @@ const transform: AxiosTransform = {
     if (isShowMessage) {
       if (hasSuccess && (successMessageText || isShowSuccessMessage)) {
         // 是否显示自定义信息提示
-        bus.emit('message.success', successMessageText || message || '操作成功！');
+        messageSubject.next({
+          type: 'success',
+          info: successMessageText || message || '操作成功！',
+        });
       } else if (!hasSuccess && (errorMessageText || isShowErrorMessage)) {
         // 是否显示自定义信息提示
-        bus.emit('message.error', message || errorMessageText || '操作失败！');
+        messageSubject.next({ type: 'error', info: message || errorMessageText || '操作失败！' });
       } else if (!hasSuccess && options.errorMessageMode === 'modal') {
         // errorMessageMode=‘custom-modal’的时候会显示modal错误弹窗，而不是消息提示，用于一些比较重要的错误
-        bus.emit('modal.info', {
-          title: '提示',
-          content: message,
-          positiveText: '确定',
-          onPositiveClick: () => {},
+        modalSubject.next({
+          type: 'info',
+          params: {
+            title: '提示',
+            content: message,
+            positiveText: '确定',
+            onPositiveClick: () => {},
+          },
         });
       }
     }
@@ -89,11 +95,11 @@ const transform: AxiosTransform = {
     // 接口请求错误，统一提示错误信息
     if (code === ResultEnum.ERROR) {
       if (message) {
-        bus.emit('message.error', data.message);
+        messageSubject.next({ type: 'error', info: data.message });
         Promise.reject(new Error(message));
       } else {
         const msg = '操作失败,系统异常!';
-        bus.emit('message.error', msg);
+        messageSubject.next({ type: 'error', info: msg });
         Promise.reject(new Error(msg));
       }
       return reject();
@@ -104,21 +110,24 @@ const transform: AxiosTransform = {
       if (router.currentRoute.value.name == 'login') return;
       // 到登录页
       const timeoutMsg = '登录超时,请重新登录!';
-      bus.emit('modal.warning', {
-        title: '提示',
-        content: '登录身份已失效，请重新登录!',
-        positiveText: '确定',
-        negativeText: '取消',
-        onPositiveClick: () => {
-          storage.clear();
-          router.replace({
-            name: 'Login',
-            query: {
-              redirect: router.currentRoute.value.fullPath,
-            },
-          });
+      modalSubject.next({
+        type: 'warning',
+        params: {
+          title: '提示',
+          content: '登录身份已失效，请重新登录!',
+          positiveText: '确定',
+          negativeText: '取消',
+          onPositiveClick: () => {
+            storage.clear();
+            router.replace({
+              name: 'Login',
+              query: {
+                redirect: router.currentRoute.value.fullPath,
+              },
+            });
+          },
+          onNegativeClick: () => {},
         },
-        onNegativeClick: () => {},
       });
       return reject(new Error(timeoutMsg));
     }
@@ -195,15 +204,18 @@ const transform: AxiosTransform = {
     const err: string = error.toString();
     try {
       if (code === 'ECONNABORTED' && message.indexOf('timeout') !== -1) {
-        bus.emit('message.error', '接口请求超时,请刷新页面重试!');
+        messageSubject.next({ type: 'error', info: '接口请求超时,请刷新页面重试!' });
         return;
       }
       if (err && err.includes('Network Error')) {
-        bus.emit('modal.info', {
-          title: '网络异常',
-          content: '请检查您的网络连接是否正常!',
-          positiveText: '确定',
-          onPositiveClick: () => {},
+        modalSubject.next({
+          type: 'info',
+          params: {
+            title: '网络异常',
+            content: '请检查您的网络连接是否正常!',
+            positiveText: '确定',
+            onPositiveClick: () => {},
+          },
         });
         return;
       }
